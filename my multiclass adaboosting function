@@ -1,5 +1,9 @@
 rm(list=ls())
 library(rpart)
+library(adabag)
+library(VGAM)
+library(rpart)
+library(randomForest)
 ################################# data ##################################
 
 cmc.data = read.table("C:\\Users\\kis91\\Dropbox\\2018 Jaebyung Lee\\cmc.data.txt",header=F,sep=",")
