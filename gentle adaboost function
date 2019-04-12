@@ -1,0 +1,63 @@
+rm(list=ls())
+library(rpart)
+library(adabag)
+library(caTools)
+################################# data ##################################
+rm(list=ls())
+library(adabag)
+library(rpart)
+bcw.data = read.table("C:\\Users\\kis91\\Desktop\\bcw.data.txt",sep=",",header=F)
+bcw.data = bcw.data[,-1]
+bcw.data$V11[bcw.data$V11==2] = -1
+bcw.data$V11[bcw.data$V11==4] = 1
+bcw.data = data.frame(apply(bcw.data[,-10],2,as.numeric),bcw.data$V11)
+
+
+train = bcw.data[1:399,]
+train = na.omit(train)
+test = bcw.data[400:699,]
+test = na.omit(test)
+tr.y = train$bcw.data.V11
+tr.x = train[,-10]
+te.y = test$bcw.data.V11
+te.x = test[,-10]
+iter = 10
+################################### my gentle adaboost funtion#######################################
+
+my.gentleb.fun = function(tr.y.vec,tr.x.mat,te.y.vec,te.x.mat,iter){
+  n = length(tr.y.vec)
+  y.vec = tr.y.vec
+  ys.vec = (y.vec+1)/2
+  iter = iter
+  w.vec = rep(1/n,n)
+  Fx = 0
+  pFx = 0
+  tr.xy.df = data.frame(tr.y.vec,tr.x.mat)
+  te.xy.df = data.frame(te.y.vec,te.x.mat)
+  
+  #train & test
+  for(i in 1:iter){
+    h = lm(tr.y.vec~.,data = tr.xy.df,weights = w.vec)
+    fx = predict(h,tr.xy.df)
+    pfx = predict(h,te.xy.df)
+    Fx = Fx + fx
+    pFx = pFx + pfx
+    w.vec = w.vec*exp(-y.vec*fx)/sum(w.vec*exp(-y.vec*fx))
+  }
+  
+  #train strong classifier
+  train.clf = Fx
+  #test strong classifier
+  test.clf = pFx
+  
+  A = list(train.clf,test.clf)
+  names(A) = c("train.clf","test.clf")
+  return(A)
+}
+
+
+v = my.gentleb.fun(tr.y,tr.x,te.y,te.x,iter)
+
+#train acc
+mean(ifelse(v$train.clf>0,1,-1)==tr.y)
+mean(ifelse(v$test.clf>0,1,-1)==te.y)
