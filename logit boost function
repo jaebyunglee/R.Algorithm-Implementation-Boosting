@@ -1,0 +1,67 @@
+rm(list=ls())
+library(rpart)
+################################# data ##################################
+mydata = read.csv("https://stats.idre.ucla.edu/stat/data/binary.csv")
+mydata[,4] = as.factor(mydata[,4])
+train = mydata[1:200,]
+test = mydata[201:400,]
+train$admit2[train$admit==1] = 1
+train$admit2[train$admit==0] = -1
+test$admit2[test$admit==1] = 1
+test$admit2[test$admit==0] = -1
+
+tr.y = train[,5]
+tr.x = train[,-c(1,5)]
+te.y = test[,5]
+te.x = test[-c(1,5)]
+iter = 10
+tr.y.vec = tr.y ; tr.x.mat = tr.x ; te.y.vec = te.y; te.x.mat = te.x
+################################## Logit boost #############################
+my.logitb.fun = function(tr.y.vec,tr.x.mat,te.y.vec,te.x.mat,iter){
+  n = length(tr.y.vec)
+  y.vec = tr.y.vec
+  ys.vec = (y.vec+1)/2
+  iter = iter
+  Fx = 0
+  pFx = 0
+  p.vec = rep(0.5,n)
+  tr.xy.df = data.frame(tr.y.vec,tr.x.mat)
+  te.xy.df = data.frame(te.y.vec,te.x.mat)
+  
+  #train and test
+  for(i in 1:iter){
+    w.vec = pmax(p.vec*(1-p.vec),1e-24)
+    z.vec = (ys.vec-p.vec)/w.vec
+    w.vec = w.vec/sum(w.vec)
+    h = lm(z.vec~.,data = tr.x.mat,weights = w.vec)
+    fx = predict(h,tr.x.mat)
+    pfx = predict(h,te.x.mat)
+    pFx = pFx+0.5*pfx
+    Fx = Fx+0.5*fx
+    ef = exp(Fx); eff = (exp(Fx)+exp(-Fx))
+    ef[ef==Inf] = 1e+7; ef[ef==0] = 1e-07
+    eff[eff==Inf] = 1e+07; eff[eff==0] = 1e-07
+    p.vec = ef/eff
+  }
+  
+  #train strong classifier
+  train.clf = Fx
+  #test strong classifier
+  test.clf = pFx
+  
+  A = list(train.clf,test.clf)
+  names(A) = c("train.clf","test.clf")
+  return(A)
+}
+
+v = my.logitb.fun(tr.y,tr.x,te.y,te.x,iter)
+mean(ifelse(v$train.clf>0,1,0)==train$admit)
+mean(ifelse(v$test.clf>0,1,0)==test$admit)
+
+
+#using vglm
+fit.glm = vglm(admit~.,data = train[,-5],family = "multinomial")
+tr.pred.glm = predict(fit.glm,train[,-5],type = "response")
+te.pred.glm = predict(fit.glm,test[,-5],type = "response")
+mean(ifelse(tr.pred.glm[,2]>0.5,1,0)==train$admit)
+mean(ifelse(te.pred.glm[,2]>0.5,1,0)==test$admit)
