@@ -1,11 +1,8 @@
 rm(list=ls())
-library(rpart)
 library(adabag)
-library(VGAM)
 library(rpart)
 library(randomForest)
-################################# data ##################################
-
+library(VGAM)
 cmc.data = read.table("C:\\Users\\kis91\\Dropbox\\2018 Jaebyung Lee\\cmc.data.txt",header=F,sep=",")
 #cmc.data = read.table("C:\\Users\\jaebyung.lee\\Desktop\\cmc.data.txt",header=F,sep=",")
 str(cmc.data)
@@ -28,7 +25,7 @@ tr.y = train[,10]
 tr.x = train[,-10]
 te.y = test[,10]
 te.x = test[,-10]
-iter = 10
+iter = 20
 ################################## Multi Adaboost #############################
 
 my.mada.fun = function(tr.y.vec,tr.x.mat,te.y.vec,te.x.mat,iter){
@@ -36,46 +33,34 @@ my.mada.fun = function(tr.y.vec,tr.x.mat,te.y.vec,te.x.mat,iter){
   nlevels = length(levels(tr.y))
   max.err = 0.5
   e.array = array(NA,c(iter,n,nlevels))
+  pred.array = array(NA,c(iter,length(te.y.vec),nlevels))
   w.vec = rep(1/n,n)
-  w.mat = matrix(NA,iter,n)
   tr.xy.df = data.frame(tr.y.vec,tr.x.mat)
   te.xy.df = data.frame(te.y.vec,te.x.mat)
-  c.vec = c()
- 
 
+ 
   #train
   for(i in 1:iter){
     h = rpart(tr.y.vec~.,data = tr.xy.df,method="class",weights = w.vec,maxdepth=10)
-    w.mat[i,] = pmax(w.vec,1e-24)
-    h.pred = predict(h,tr.xy.df,type="class")
-    e = sum(w.vec*(tr.y.vec!=h.pred))/sum(w.vec)
+    trh.pred = predict(h,tr.xy.df,type="class")
+    teh.pred = predict(h,te.xy.df,type="class")
+    e = sum(w.vec*(tr.y.vec!=trh.pred))/sum(w.vec)
     c = log((1-e)/e)/2 
     if(e>=max.err){ c = log((1-max.err)/max.err)/2 } #################
     if(e==0){ c = log((1-0.001)/0.001)/2 }
-    c.vec = c(c.vec,c)
-    i.vec = tr.y.vec==h.pred
+    i.vec = tr.y.vec==trh.pred
     w.vec = w.vec*exp(c*(1-i.vec))
     w.vec = w.vec/sum(w.vec)
-    e.array[i,,1] = c*(h.pred==1)
-    e.array[i,,2] = c*(h.pred==2)
-    e.array[i,,3] = c*(h.pred==3)
-    
+    e.array[i,,1] = c*(trh.pred==1); pred.array[i,,1] = c*(teh.pred==1)
+    e.array[i,,2] = c*(trh.pred==2); pred.array[i,,2] = c*(teh.pred==2)
+    e.array[i,,3] = c*(trh.pred==3); pred.array[i,,3] = c*(teh.pred==3)
   }
   C.mat = t(colSums(e.array))
   Cx = apply(C.mat,2,which.max)
- 
-  pred.array = array(NA,c(iter,length(te.y.vec),nlevels))
-  for(i in 1:iter){
-    h = rpart(tr.y.vec~.,data = tr.xy.df,method="class",weights = w.mat[i,],maxdepth=10)
-    h.pred = predict(h,te.xy.df,type="class")
-    pred.array[i,,1] = c.vec[i]*(h.pred==1)
-    pred.array[i,,2] = c.vec[i]*(h.pred==2)
-    pred.array[i,,3] = c.vec[i]*(h.pred==3)
-  }
-  
+
   p.C.mat = t(colSums(pred.array))
   p.Cx = apply(p.C.mat,2,which.max)
-
+  
   A = list(Cx,p.Cx)
   names(A) = c("train.clf","test.clf")
   return(A)
@@ -85,7 +70,6 @@ v = my.mada.fun(tr.y,tr.x,te.y,te.x,10)
 #train acc
 comp.mat[1,1] = mean(tr.y==v$train.clf)
 comp.mat[2,1] = mean(test$V10==v$test.clf)
-
 ################################ adaboosting ###################################
 
 
