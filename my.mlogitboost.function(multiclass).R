@@ -12,7 +12,7 @@ str(cmc.data)
 dim(cmc.data)
 train = cmc.data[1:1000,]
 test = cmc.data[1001:1473,]
-
+ 
 tr.y = train[,10]
 tr.x = train[,-10]
 te.y = test[,10]

@@ -9,7 +9,7 @@ y.vec = rnorm(n)
 
 ###
 iter = 1:15
-trid = sample(1:n)[1:(n*0.7)]
+trid = sample(1:n)[1:(n*0.7)] 
 try.vec = y.vec[trid]; tey.vec = y.vec[-trid]
 trx.mat = x.mat[trid,]; tex.mat = x.mat[-trid,]
 xy.df = data.frame(try.vec,trx.mat); nxy.df = data.frame(tey.vec,tex.mat)

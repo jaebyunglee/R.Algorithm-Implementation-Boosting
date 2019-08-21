@@ -6,7 +6,7 @@ n = 10000; p = 30
 x.mat = matrix(rnorm(n*p),n,p)
 y.vec = rnorm(n)
 
-iter = 1:15
+iter = 1:15 
 loss.mat = matrix(NA,length(iter),2)
 
 trid = sample(1:n)[1:(n*0.7)]

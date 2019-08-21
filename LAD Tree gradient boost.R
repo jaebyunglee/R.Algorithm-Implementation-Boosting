@@ -10,7 +10,7 @@ y.vec = rnorm(n)
 iter = 1:15
 loss.mat = matrix(NA,length(iter),2)
 
-trid = sample(1:n)[1:(n*0.7)]
+trid = sample(1:n)[1:(n*0.7)] 
 trx.mat = x.mat[trid,]
 try.vec = y.vec[trid]
 tex.mat = x.mat[-trid,]

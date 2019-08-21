@@ -8,7 +8,7 @@ cmc.data = read.table("C:\\Users\\kis91\\Dropbox\\2018 Jaebyung Lee\\cmc.data.tx
 str(cmc.data)
 cmc.data$V1 = as.numeric(cmc.data$V1)
 cmc.data$V4 = as.numeric(cmc.data$V4)
-cols <- c(names(cmc.data)[-c(1,4)])
+cols <- c(names(cmc.data)[-c(1,4)]) 
 cmc.data[,cols] <- data.frame(apply(cmc.data[,cols], 2, as.factor))
 str(cmc.data)
 dim(cmc.data)

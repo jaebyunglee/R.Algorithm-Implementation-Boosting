@@ -2,7 +2,7 @@ rm(list=ls())
 library(rpart)
 library(adabag)
 library(ada)
-################################# data ##################################
+################################# data ###################################
 mydata = read.csv("https://stats.idre.ucla.edu/stat/data/binary.csv")
 mydata[,4] = as.factor(mydata[,4])
 train = mydata[1:200,]

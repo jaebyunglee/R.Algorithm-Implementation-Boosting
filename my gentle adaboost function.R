@@ -11,7 +11,7 @@ bcw.data = data.frame(apply(bcw.data[,-10],2,as.numeric),bcw.data$V11)
 
 
 train = bcw.data[1:499,]
-train = na.omit(train)
+train = na.omit(train) 
 test = bcw.data[500:699,]
 test = na.omit(test)
 tr.y = train$bcw.data.V11

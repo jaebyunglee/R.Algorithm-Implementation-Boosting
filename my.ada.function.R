@@ -10,7 +10,7 @@ train = mydata[1:350,]
 test = mydata[351:400,]
 train$admit2[train$admit==1] = 1
 train$admit2[train$admit==0] = -1
-test$admit2[test$admit==1] = 1
+test$admit2[test$admit==1] = 1 
 test$admit2[test$admit==0] = -1
 
 tr.y = train[,5]

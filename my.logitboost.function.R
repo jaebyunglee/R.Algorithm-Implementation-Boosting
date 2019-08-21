@@ -6,7 +6,7 @@ library(ada)
 mydata = read.csv("https://stats.idre.ucla.edu/stat/data/binary.csv")
 mydata[,4] = as.factor(mydata[,4])
 train = mydata[1:200,]
-test = mydata[201:400,]
+test = mydata[201:400,] 
 train$admit2[train$admit==1] = 1
 train$admit2[train$admit==0] = -1
 test$admit2[test$admit==1] = 1

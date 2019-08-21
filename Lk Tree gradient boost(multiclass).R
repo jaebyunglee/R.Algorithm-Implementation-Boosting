@@ -11,7 +11,7 @@ cmc.data$V4 = as.numeric(cmc.data$V4)
 cols <- c(names(cmc.data)[-c(1,4)])
 cmc.data[,cols] <- data.frame(apply(cmc.data[,cols], 2, as.factor))
 str(cmc.data)
-dim(cmc.data)
+dim(cmc.data) 
 
 ##################################################################################
 n = dim(cmc.data)[1]

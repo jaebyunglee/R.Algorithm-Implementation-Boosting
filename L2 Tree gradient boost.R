@@ -2,10 +2,10 @@ rm(list=ls())
 library(rpart)
 library(gbm)
 library(quantreg)
-library(randomForest)
+library(randomForest)j
 set.seed(12)
 n = 1000; p = 30
-x.mat = matrix(rnorm(n*p),n,p)
+x.mat = matrix(rnorm(n*p),n,p) 
 y.vec = rnorm(n)
 y.vec = ifelse(y.vec>0,1,-1)
 
